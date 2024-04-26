@@ -85,20 +85,20 @@ $$S_t=W^{*}=DTW(X,\hat{X})=min\Bigg[\frac{1}{k} \sqrt{\sum_{k=1}^{k}w_k}\Bigg]\t
 ## 基于Att-ADGAN的知识蒸馏框架S-KDGAN 
 为解决资源受限设备提出了一种用于高维时间序列数据的两阶段知识蒸馏框架S-KDGAN  
 本文使用**面向过程**的知识蒸馏框架S-KDGAN，该框架使用模型架构及参数完整的Att-ADGAN作为教师网络，通过中间层信息何输出信息来指导轻量化的学生网络。蒸馏整体结构图如下：
-![alt text](S-KDGAN.png)
-### 蒸馏损失  
-教师网络的生成器损失函数定义：
-**对抗损失：**
-$$L_{adv}^{T} = E_{X \sim pX}\big[ log(D(X)) \big] + E_{X \sim pX}\big[ log(1-D(G(\varepsilon(X)))) \big] \tag{4-1}$$
-**特征损失：**
-$$L_{fea}^{T} = E_{X \sim PX} \|f(X) - f(G(\varepsilon(X)))\|_{2} \tag{4-2}$$
-**映射损失：**
-$$L_{map}^{T} = E_{X \sim PX} \| X - G(\varepsilon(X)) \|_{2} \tag{4-3}$$
-**生成器总损失：**
-$$L_{G}^{T} =\lambda_{a}^{T}L_{adv}^{T} + \lambda_{f}^{T}L_{fea}^{T} +\lambda_{m}^{T}L_{map}^{T}   \tag{4-4}$$
-**判别器总损失：**
-$$L_{D}^{T} = E_{X \sim pX}\big[ log(D(X)) \big] + E_{X \sim pX}\big[ log(1-D(G(\varepsilon(X)))) \big] \tag{4-5}$$
-注：$\lambda_{a}^{T} 、 \lambda_{f}^{T} 和 \lambda_{m}^{T}$是其损失对应的加权参数，$L_{G}^{T}$是生成器对应的损失函数，$L_{D}^{T}$是判别器对应的损失函数。
-因为学生模型与教师模型目标一致，因此学生生成器$L_{G}^{T}$和判别器损失$L_{D}^{T}$与教师网络一致。
-为训练蒸馏网络，设计了四个损失以测量向量间的相似性，编码器中间层损失$I_1$，潜向量输出损失$K_1$，判别器中间层损失$I_2$，重构损失$K_2$
+![alt text](S-KDGAN.png)     
+### 蒸馏损失     
+教师网络的生成器损失函数定义：     
+**对抗损失：**       
+$$L_{adv}^{T} = E_{X \sim pX}\big[ log(D(X)) \big] + E_{X \sim pX}\big[ log(1-D(G(\varepsilon(X)))) \big] \tag{4-1}$$      
+**特征损失：**      
+$$L_{fea}^{T} = E_{X \sim PX} \|f(X) - f(G(\varepsilon(X)))\|_{2} \tag{4-2}$$     
+**映射损失：**      
+$$L_{map}^{T} = E_{X \sim PX} \| X - G(\varepsilon(X)) \|_{2} \tag{4-3}$$      
+**生成器总损失：**     
+$$L_{G}^{T} =\lambda_{a}^{T}L_{adv}^{T} + \lambda_{f}^{T}L_{fea}^{T} +\lambda_{m}^{T}L_{map}^{T}   \tag{4-4}$$     
+**判别器总损失：**       
+$$L_{D}^{T} = E_{X \sim pX}\big[ log(D(X)) \big] + E_{X \sim pX}\big[ log(1-D(G(\varepsilon(X)))) \big] \tag{4-5}$$      
+注： $\lambda_{a}^{T} 、 \lambda_{f}^{T} 和 \lambda_{m}^{T}$ 是其损失对应的加权参数， $L_{G}^{T}$ 是生成器对应的损失函数，$L_{D}^{T}$是判别器对应的损失函数。
+因为学生模型与教师模型目标一致，因此学生生成器 $L_{G}^{T}$ 和判别器损失 $L_{D}^{T}$ 与教师网络一致。
+为训练蒸馏网络，设计了四个损失以测量向量间的相似性，编码器中间层损失 $I_1$ ，潜向量输出损失 $K_1$ ，判别器中间层损失 $I_2$ ，重构损失 $K_2$ 。
 
