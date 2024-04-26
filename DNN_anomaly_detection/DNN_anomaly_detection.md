@@ -30,11 +30,13 @@ $s_w = 30\times i,i=1,2,\dots,n$
 **对抗损失**：生成器会尽量减少损失，判别器试图最大化损失
 $$L_{adv} = E_{X\sim pX}[\log(D(X))]+E_{X\sim pX}[\log(1-D(\varepsilon(X)))] \tag{1}$$
 注：其中$D(X)$是判别器输出，$E_{X \sim pX}$表示从实空间采样的真实样本，$\log(D(X))$表示判别器预期原始样本为真，$\log(1-D(\varepsilon(X)))$表示预期生成的样本为假。
-**特征损失**：$$L_{fea} =  E_{X\sim pX} \|f(X) - f(G(\varepsilon(X)))\|_{2} \tag{2}$$
+**特征损失**：
+$$L_{fea} =  E_{X\sim pX} \|f(X) - f(G(\varepsilon(X)))\|_{2} \tag{2}$$
 注：其中f(*)是判别器最后一层输出，损失是f(X)和$f(G(\varepsilon(X)))$的L2范数。
 **映射损失**：为确保原始数据$x_{i}$可以映射到潜空间$z_{i}$，最小化原始与重构样本的残差的L2范数
 $$L_{map} = E_{X \sim pX}\| X - G(\varepsilon(x)) \|_{2} \tag{3}$$
-**总损失**：$$L_{G} = \lambda_{a}L_{adv} + \lambda_{f}L_{fea} + \lambda_{m}L_{map} \tag{4}$$
+**总损失**：
+$$L_{G} = \lambda_{a}L_{adv} + \lambda_{f}L_{fea} + \lambda_{m}L_{map} \tag{4}$$
 注：$\lambda_{a}$,$\lambda_{f}$和$\lambda_{m}$表示权重
 
 - 3.生成器与判别器
@@ -56,9 +58,11 @@ $$b_{ij}=\frac{exp(s_{ij}^{feature})}{\Sigma_{k^{\prime}=1}^{d}exp(s_{ik^{\prime
 - 1.异常检测细节
 使用与训练集相同的数据预处理方法，根据时间窗口将标记测试集划分为子序列。
 将驻点误差与曲线相似度组合为最终的异常分数。
-驻点误差：$$l_{d} = \sum_{i=1}^{n}|x_{t}^{test,i} - G(\varepsilon(x_{t}^{test,i}))|\tag{9}$$
+驻点误差：
+$$ l_{d} = \sum_{i=1}^{n}|x_{t}^{test,i} - G(\varepsilon(x_{t}^{test,i}))|\tag{9}$$
 注：$x_{t}^{test,i} \in R^{n}$为t时刻第i个变量的测量值
-曲线相似度（使用DTW算法）：$$S_t=W^{*}=DTW(X,\hat{X})=min\Bigg[\frac{1}{k} \sqrt{\sum_{k=1}^{k}w_k}\Bigg]\tag{10}$$
+曲线相似度（使用DTW算法）：
+$$S_t=W^{*}=DTW(X,\hat{X})=min\Bigg[\frac{1}{k} \sqrt{\sum_{k=1}^{k}w_k}\Bigg]\tag{10}$$
 最终重构误差：$L_R=\alpha L_d + \beta S_t$
 - 2.实验部分
   使用数据集：SWMRU、KDDCup99、HomeC
