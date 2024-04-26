@@ -10,8 +10,8 @@
 ![alt text](Att-ADGAN.jpg)
 Att-ADGAN使用**LSTM作为生成器和判别器**的基本模型来处理复杂的多维时间序列数据。
 对于多维时间序列数据，将数据划分为**子序列**，子序列通过滑动窗口机制被送到模型中，窗口大小设置为：
-$s_w = 30\times i,i=1,2,\dots,n$
-- 模型训练步骤
+$s_w = 30\times i,i=1,2,\dots,n$   
+模型训练步骤
 - 1.数据预处理
 1）将数据集划分为训练集、验证集和测试集
 2）其中**训练集需要全部为正常数据**，确保模型准确学习到正常数据的分布模式
@@ -34,7 +34,7 @@ $$L_{adv} = E_{X\sim pX}[\log(D(X))]+E_{X\sim pX}[\log(1-D(\varepsilon(X)))] \ta
 $$L_{fea} =  E_{X\sim pX} \|f(X) - f(G(\varepsilon(X)))\|_{2} \tag{2}$$
 注：其中f(*)是判别器最后一层输出，损失是f(X)和$f(G(\varepsilon(X)))$的L2范数。
 **映射损失**：为确保原始数据$x_{i}$可以映射到潜空间$z_{i}$，最小化原始与重构样本的残差的L2范数
-$$L_{map} = E_{X \sim pX}\| X - G(\varepsilon(x)) \|_{2} \tag{3}$$
+$$L_{map} = E_{X \sim pX}\| X - G(\varepsilon(X)) \|_{2} \tag{3}$$
 **总损失**：
 $$L_{G} = \lambda_{a}L_{adv} + \lambda_{f}L_{fea} + \lambda_{m}L_{map} \tag{4}$$
 注：$\lambda_{a}$,$\lambda_{f}$和$\lambda_{m}$表示权重
@@ -70,7 +70,35 @@ $$S_t=W^{*}=DTW(X,\hat{X})=min\Bigg[\frac{1}{k} \sqrt{\sum_{k=1}^{k}w_k}\Bigg]\t
   $$Pre = \frac{TP}{TP+FP}$$
   $$Rec = \frac{TP}{TP+FN}$$
   $$F1 = 2 \times \frac{Pre \times Rec}{Pre - Rec}$$
-  注：TP（True Positives）：是正确检测到异常
-  FP（False Positives）是错误检测到正常
-  TN（True Negatives）是正确检测到正常
-  FN（False Negatives）是错误检测到正常
+  注：TP（True Positives）：是正确检测到异常  
+  FP（False Positives）是错误检测到正常  
+  TN（True Negatives）是正确检测到正常  
+  FN（False Negatives）是错误检测到正常  
+
+- 3.结果与讨论
+1）数据重构性能  
+实验证明加入attention机制重构更加准确，使用最大平均差异（Maximum Mean Discrepancy，MMD）进行评估   
+2）窗口设置与重构误差度量值   
+证明窗口大小对实验结果有影响   
+
+***
+## 基于Att-ADGAN的知识蒸馏框架S-KDGAN 
+为解决资源受限设备提出了一种用于高维时间序列数据的两阶段知识蒸馏框架S-KDGAN  
+本文使用**面向过程**的知识蒸馏框架S-KDGAN，该框架使用模型架构及参数完整的Att-ADGAN作为教师网络，通过中间层信息何输出信息来指导轻量化的学生网络。蒸馏整体结构图如下：
+![alt text](S-KDGAN.png)
+### 蒸馏损失  
+教师网络的生成器损失函数定义：
+**对抗损失：**
+$$L_{adv}^{T} = E_{X \sim pX}\big[ log(D(X)) \big] + E_{X \sim pX}\big[ log(1-D(G(\varepsilon(X)))) \big] \tag{4-1}$$
+**特征损失：**
+$$L_{fea}^{T} = E_{X \sim PX} \|f(X) - f(G(\varepsilon(X)))\|_{2} \tag{4-2}$$
+**映射损失：**
+$$L_{map}^{T} = E_{X \sim PX} \| X - G(\varepsilon(X)) \|_{2} \tag{4-3}$$
+**生成器总损失：**
+$$L_{G}^{T} =\lambda_{a}^{T}L_{adv}^{T} + \lambda_{f}^{T}L_{fea}^{T} +\lambda_{m}^{T}L_{map}^{T}   \tag{4-4}$$
+**判别器总损失：**
+$$L_{D}^{T} = E_{X \sim pX}\big[ log(D(X)) \big] + E_{X \sim pX}\big[ log(1-D(G(\varepsilon(X)))) \big] \tag{4-5}$$
+注：$\lambda_{a}^{T} 、 \lambda_{f}^{T} 和 \lambda_{m}^{T}$是其损失对应的加权参数，$L_{G}^{T}$是生成器对应的损失函数，$L_{D}^{T}$是判别器对应的损失函数。
+因为学生模型与教师模型目标一致，因此学生生成器$L_{G}^{T}$和判别器损失$L_{D}^{T}$与教师网络一致。
+为训练蒸馏网络，设计了四个损失以测量向量间的相似性，编码器中间层损失$I_1$，潜向量输出损失$K_1$，判别器中间层损失$I_2$，重构损失$K_2$
+
