@@ -65,8 +65,8 @@ $$ l_{d} = \sum_{i=1}^{n}|x_{t}^{test,i} - G(\varepsilon(x_{t}^{test,i}))|\tag{9
 $$S_t=W^{*}=DTW(X,\hat{X})=min\Bigg[\frac{1}{k} \sqrt{\sum_{k=1}^{k}w_k}\Bigg]\tag{10}$$
 最终重构误差：$L_R=\alpha L_d + \beta S_t$
 - 2.实验部分
-  使用数据集：SWMRU、KDDCup99、HomeC
-  评估指标：精度（Precision）、召回率（Recall）和F1分数
+  使用数据集：**SWMRU、KDDCup99、HomeC**
+  评估指标：**精度（Precision）、召回率（Recall）和F1分数**
   $$Pre = \frac{TP}{TP+FP}$$
   $$Rec = \frac{TP}{TP+FN}$$
   $$F1 = 2 \times \frac{Pre \times Rec}{Pre - Rec}$$
@@ -95,10 +95,28 @@ $$L_{fea}^{T} = E_{X \sim PX} \|f(X) - f(G(\varepsilon(X)))\|_{2} \tag{4-2}$$
 **映射损失：**      
 $$L_{map}^{T} = E_{X \sim PX} \| X - G(\varepsilon(X)) \|_{2} \tag{4-3}$$      
 **生成器总损失：**     
-$$L_{G}^{T} =\lambda_{a}^{T}L_{adv}^{T} + \lambda_{f}^{T}L_{fea}^{T} +\lambda_{m}^{T}L_{map}^{T}   \tag{4-4}$$     
+$$L_{G}^{T} =\lambda_{a}^{T}L_{adv}^{T} + \lambda_{f}^{T}L_{fea}^{T} +\lambda_{m}^{T}L_{map}^{T}   \tag{4-4}$$  
+教师网络的判别器损失函数定义：    
 **判别器总损失：**       
 $$L_{D}^{T} = E_{X \sim pX}\big[ log(D(X)) \big] + E_{X \sim pX}\big[ log(1-D(G(\varepsilon(X)))) \big] \tag{4-5}$$      
 注： $\lambda_{a}^{T} 、 \lambda_{f}^{T} 和 \lambda_{m}^{T}$ 是其损失对应的加权参数， $L_{G}^{T}$ 是生成器对应的损失函数，$L_{D}^{T}$是判别器对应的损失函数。
 因为学生模型与教师模型目标一致，因此学生生成器 $L_{G}^{T}$ 和判别器损失 $L_{D}^{T}$ 与教师网络一致。
 为训练蒸馏网络，设计了四个损失以测量向量间的相似性，编码器中间层损失 $I_1$ ，潜向量输出损失 $K_1$ ，判别器中间层损失 $I_2$ ，重构损失 $K_2$ 。
+细节：损失由L1距离给出，L2距离会导致模型误差变大。分别计算教师网络与学生网络编码器中间层损失 $I_1$ ，潜向量输出损失 $K_1$ ，判别器中间层损失 $I_2$ ，重构损失 $K_2$ 的L1距离。
+**蒸馏损失：**
+$$K_d = W_1I_1 + \gamma_1K_1 + W_2I_2 + \gamma_2K_2 \tag{4-6}$$
+S-KDGAN训练一共包含5个损失函数：教师网络生成器损失$L_G^T$,教师网络判别器损失$L_D^T$,学生网络生成器损失$L_G^S$,学生网络判别器损失$L_D^S$,蒸馏损失$K_d$，为研究是否与学生网络结合进行协同训练也将影响最终的蒸馏结构。设计了四个关于上述损失的组合：
+**KD-A：**$\mathcal{L_1} = \{ K_d\}$
+注：教师网络与学生网络的损失函数均不参与训练，训练过程仅依靠蒸馏损失$K_d$
+**KD-B:**$\mathcal{L}_2=\{L_G^S,L_D^S,k_d\}$
+注：教师网络的损失函数不参与训练，效果较KD-A会有所提示。
+**KD-C：**$\mathcal{L}_3=\{L_G^T,L_D^T,k_d\}$
+注：学生网络的损失函数不参与训练，较KD-B参数量有所提升，预期蒸馏效果高于KD-B.
+**KD-D：**$\mathcal{L_4} = \{L_G^T,L_D^T,L_G^S,L_D^S,k_d\}$
+注：所有损失函数均参与训练
+通过四种组合，试图找出最佳的组合训练方案。根据上述四种蒸馏结构，提出了一个两阶段的训练方式
+### 蒸馏二阶段
+S-KDGAN通过两阶段的训练方式不断提高学生网络的蒸馏效果，两阶段蒸馏示意图如下：
+![alt text](two-stage-mode.png)
+
 
